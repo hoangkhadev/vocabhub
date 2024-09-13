@@ -14,16 +14,7 @@
 
 <body>
     <div class="flex h-screen overflow-hidden bg-primary text-white">
-        @include('layouts.sidebar')
-        <div class="flex-1">
-            <div class="flex flex-col px-4 h-screen overflow-y-scroll">
-                @include('layouts.header')
-                <main class="flex-1 px-10 w-full">
-                    @yield('content')
-                </main>
-                @include('layouts.footer')
-            </div>
-        </div>
+        @yield('content')
     </div>
 </body>
 
