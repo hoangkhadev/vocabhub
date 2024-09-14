@@ -9,7 +9,8 @@ export default {
     extend: {
       colors: {
         primary: '#0A092D',
-        secondary: '#2E3856'
+        secondary: '#2E3856',
+        overlay: 'rgba(0,0,0,0.5)'
       },
       boxShadow: {
         menu: '0 0 4px 2px rgba(255, 255, 255, 0.2)'

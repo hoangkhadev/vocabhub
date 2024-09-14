@@ -16,6 +16,8 @@
     <div class="flex h-screen overflow-hidden bg-primary text-white">
         @yield('content')
     </div>
+
+    @stack('js')
 </body>
 
 </html>

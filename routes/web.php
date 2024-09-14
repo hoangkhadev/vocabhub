@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TopicController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VocabularyController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('isAuth')->group(function () {
@@ -22,15 +24,15 @@ Route::middleware('checkUserLogin')->group(function () {
         return view('welcome');
     })->name('guest.home');
 
-    Route::get('/topics', function () {
-        return view('guest.topic');
-    })->name('guest.topic');
+    //Topic
+    Route::get('/topic', [TopicController::class, 'index'])->name('guest.topic');
+    Route::get('/topic/create', [TopicController::class, 'create'])->name('guest.topic.create');
+    Route::post('/topic', [TopicController::class, 'store'])->name('guest.topic.store');
+    Route::post('/topic/update', [TopicController::class, 'update'])->name('guest.topic.update');
+    Route::get('/topic/{id}', [TopicController::class, 'show'])->name('guest.pratice');
+    Route::delete('/topic/delete', [TopicController::class, 'destroy'])->name('guest.topic.destroy');
 
-    Route::get('/topics/{id}', function () {
-        return view('guest.topic-detail');
-    })->name('guest.pratice');
+    //Vocabulary
+    Route::post('/vocabulary/create', [VocabularyController::class, 'store'])->name('guest.vocabulary.store');
 
-    Route::get('/topic/create', function () {
-        return view('guest.topic-create');
-    })->name('guest.create-topic');
 });

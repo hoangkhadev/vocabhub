@@ -14,7 +14,7 @@
             </form>
         </div>
         <div class="flex items-center gap-x-12">
-            <a href="{{route('guest.create-topic')}}"
+            <a href="{{route('guest.topic.create')}}"
                 class="bg-blue-600 hover:bg-blue-700 py-2 px-2 rounded-md flex items-center gap-x-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                     stroke="currentColor" class="size-6">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SignInRequest;
 use App\Models\User;
 use Auth;
 use DB;
@@ -17,15 +18,9 @@ class AuthController extends Controller
     {
         return view('auth.signin');
     }
-    public function signin(Request $request)
+    public function signin(SignInRequest $request)
     {
         try {
-            //code...
-            $request->validate([
-                'email' => ['required', 'email:rfc,dns'],
-                'password' => ['required', 'min:6']
-            ]);
-
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
                 return redirect()->intended('/');
             }
