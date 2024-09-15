@@ -11,13 +11,17 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('topics', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('id')->autoIncrement();
+            $table->unsignedBigInteger('user_id');
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->integer('max_score')->nullable();
             $table->integer('count')->nullable();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
+
+            $table->primary(['id', 'user_id']);
+            $table->foreign('user_id')->references('id')->on('users')
+                ->cascadeOnDelete();
         });
     }
 

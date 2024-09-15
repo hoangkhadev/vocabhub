@@ -5,7 +5,7 @@
 <ul class="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-5">
     @foreach ($topics as $topic)
     <li
-        class="group relative bg-secondary p-4 rounded-lg hover:scale-105 hover:bg-slate-700 transition-all duration-200 overflow-hidden">
+        class="group relative bg-secondary p-4 rounded-lg hover:scale-105 hover:bg-slate-700 transition-all duration-200 overflow-hidden topic-item">
         <a href="{{route('guest.pratice', ['id' =>  $topic->slug])}}" class="flex flex-col gap-4">
             <div class="flex justify-between gap-4">
                 <div>
@@ -41,7 +41,7 @@
                 </div>
                 <p class="text-sm font-medium">
                     Best score: <span class="text-xs text-blue-500">
-                        <span>{{$topic->max_score?? 0}}</span>/<span>{{$topic->count}}</span>
+                        <span>{{$topic->max_score?? 0}}</span>/<span>{{$topic->count ?? 0}}</span>
                     </span>
                 </p>
             </div>
@@ -51,4 +51,50 @@
     </li>
     @endforeach
 </ul>
+<div id="empty-topic" class="w-fit mx-auto my-10">
+    <svg class="mx-auto" id="Layer_1" enable-background="new 0 0 497 497" height="100" viewBox="0 0 497 497" width="100"
+        xmlns="http://www.w3.org/2000/svg">
+        <g>
+            <g>
+                <path
+                    d="m487 163.491h-477c-5.523 0-10 4.477-10 10v313.509c0 5.523 4.477 10 10 10h219.378c4.383-5.771 11.316-9.5 19.122-9.5s14.739 3.729 19.122 9.5h219.378c5.523 0 10-4.477 10-10v-313.509c0-5.522-4.477-10-10-10z"
+                    fill="#6e9eff" />
+            </g>
+            <g>
+                <path
+                    d="m487 163.491h-40c5.523 0 10 4.477 10 10v313.509c0 5.523-4.477 10-10 10h40c5.523 0 10-4.477 10-10v-313.509c0-5.522-4.477-10-10-10z"
+                    fill="#5990ff" />
+            </g>
+            <g>
+                <path d="m32.648 210.5h431.704v255.418h-431.704z" fill="#c5d7e6" />
+                <path d="m248.5 154.199v308.469s-81.351-67.317-215.852-20v-288.469s108.468-50.99 215.852 0z"
+                    fill="#e4ecf2" />
+                <path d="m248.5 159.116s-46.85-105.069-165.852-130v303.552c119.002 24.931 165.852 130 165.852 130z"
+                    fill="#f0f5fa" />
+                <path
+                    d="m248.508 159.116s3.142-134.184-115.86-159.116v303.552c119.002 24.931 115.86 159.116 115.86 159.116z"
+                    fill="#e4ecf2" />
+                <path d="m248.5 154.199v308.469s81.351-67.317 215.852-20v-288.469s-108.468-50.99-215.852 0z"
+                    fill="#e4ecf2" />
+                <path d="m248.516 159.116s65.325-70 185.852-70v303.552c-120.528 0-185.852 70-185.852 70z"
+                    fill="#f0f5fa" />
+            </g>
+        </g>
+    </svg>
+    <p class="text-lg font-medium w-full text-center">Don't have any topic now</p>
+</div>
+
 @endsection
+
+@push('js')
+<script>
+    $(document).ready(function () {
+        if($('.topic-item').length <= 0) {
+            $('#empty-topic').show();
+        } else {
+            $('#empty-topic').hide();
+        }
+             
+    });
+</script>
+@endpush

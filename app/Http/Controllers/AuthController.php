@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SignInRequest;
+use App\Mail\UserResetPassword;
 use App\Models\User;
 use Auth;
-use DB;
 use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Log;
-use Validator;
+use Mail;
 
 class AuthController extends Controller
 {
@@ -74,5 +74,37 @@ class AuthController extends Controller
     {
         $user = auth()->user();
         return view('guest.profile', compact('user'));
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email:rfc,dns|exists:users,email'
+        ]);
+        $user = User::where(['email' => $request->email])->first();
+        if ($user) {
+            session()->flash('sent_success', 'We sent you a link to reset your password. Please check email!');
+
+            Mail::to($request->email)->send(new UserResetPassword($user->name));
+            session()->put('reset_email', $request->email);
+            return redirect()->route('auth.forgot-password');
+        }
+    }
+
+    public function makeNewPassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|min:6'
+        ]);
+
+        $email = session()->get('reset_email');
+
+        User::where(['email' => $email])->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        session()->forget('reset_email');
+
+        return redirect()->route('auth.getSignin');
     }
 }

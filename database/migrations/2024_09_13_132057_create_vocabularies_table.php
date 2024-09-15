@@ -15,7 +15,8 @@ return new class extends Migration {
             $table->string('english');
             $table->string('vietnamese');
             $table->string('image')->nullable();
-            $table->foreignId('topic_id')->constrained('topics')->cascadeOnDelete();
+            $table->unsignedBigInteger('topic_id');
+            $table->foreign('topic_id')->references('id')->on('topics')->cascadeOnDelete();
             $table->timestamps();
         });
     }

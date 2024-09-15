@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TestController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VocabularyController;
@@ -20,9 +21,7 @@ Route::middleware('checkUserLogin')->group(function () {
     Route::get('/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
     Route::post('/update', [UserController::class, 'update'])->name('user.update');
 
-    Route::get('/', function () {
-        return view('welcome');
-    })->name('guest.home');
+    Route::get('/', [TopicController::class, 'index'])->name('guest.home');
 
     //Topic
     Route::get('/topic', [TopicController::class, 'index'])->name('guest.topic');
@@ -34,5 +33,21 @@ Route::middleware('checkUserLogin')->group(function () {
 
     //Vocabulary
     Route::post('/vocabulary/create', [VocabularyController::class, 'store'])->name('guest.vocabulary.store');
+    Route::post('/vocabulary/update', [VocabularyController::class, 'update'])->name('guest.vocabulary.update');
+    Route::post('/vocabulary/delete', [VocabularyController::class, 'destroy'])->name('guest.vocabulary.destroy');
 
+    //Test
+    Route::get('/test/{user}/{topicname}', [TestController::class, 'index'])->name('guest.test.show');
 });
+
+//Forgot password
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('auth.forgot-password');
+Route::post('/forgot-passowrd', [AuthController::class, 'resetPassword'])->name('auth.process-forgot-password');
+
+Route::get('/reset-password', function () {
+    return view('auth.reset-password');
+})->name('auth.reset-password');
+
+Route::post('/reset-passowrd', [AuthController::class, 'makeNewPassword'])->name('auth.process-reset-password');

@@ -38,7 +38,7 @@
             </div>
             <p class="text-red-400 text-sm">@error('password'){{$message}}@enderror</p>
         </div>
-        <a href="" class="text-sm float-end hover:underline mb-4">Forgot password?</a>
+        <a href="{{route('auth.forgot-password')}}" class="text-sm float-end hover:underline mb-4">Forgot password?</a>
         <p class="text-sm text-red-400">
             {{session()->get('errorSignin')}}
         </p>

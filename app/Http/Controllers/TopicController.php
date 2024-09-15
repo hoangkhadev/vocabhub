@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TopicRequest;
 use App\Models\Topic;
 use App\Models\Vocabulary;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Log;
 use Str;
 
@@ -22,57 +22,56 @@ class TopicController extends Controller
         return view('guest.topic-create');
     }
 
-    public function store(Request $request)
+    public function store(TopicRequest $request)
     {
-        $request->validate([
-            'name' => ['required', Rule::unique(Topic::class, 'name')],
-        ]);
-
-        $topic = Topic::create([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
-            'user_id' => $request->user_id
-        ]);
-
-        if ($topic) {
-            $length = count($request->english);
-            $count = 0;
-            for ($i = 0; $i < $length; $i++) {
-                if (!empty($request->english[$i]) && !empty($request->vietnamese[$i])) {
-                    $payload = [
-                        'topic_id' => $topic->id,
-                        'english' => $request->english[$i],
-                        'vietnamese' => $request->vietnamese[$i]
-                    ];
-                    if (!empty($request->image[$i])) {
-                        $file = $request->image[$i];
-                        $imageName = uniqid() . '.' . $file->getClientOriginalExtension();
-                        $file->move(public_path('vocabulary'), $imageName);
-
-                        $payload['image'] = $imageName;
-                    }
-
-                    $vocabulary = Vocabulary::create($payload);
-                    if ($vocabulary) {
-                        $count++;
-                    }
-                }
-            }
-            $topic->update([
-                'count' => $count
+        try {
+            // Tạo topic mới
+            $topic = Topic::create([
+                'name' => $request->name,
+                'slug' => Str::slug($request->name),
+                'user_id' => auth()->id(),
             ]);
 
-            session()->flash('status_create_topic', 'Created topic successfully!');
-            return redirect()->back();
-        }
+            if (!empty($request->english[0])) {
+                // Xử lý từ vựng và hình ảnh
+                $count = 0;
+                foreach ($request->english as $key => $englishWord) {
+                    $vocabularyData = [
+                        'topic_id' => $topic->id,
+                        'english' => $englishWord,
+                        'vietnamese' => $request->vietnamese[$key],
+                    ];
 
-        session()->flash('status_create_topic', 'Failed to create topic. Please try again!');
-        return redirect()->back();
+                    // Xử lý ảnh nếu có
+                    if ($request->hasFile("image.$key")) {
+                        $file = $request->file("image.$key");
+                        $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+                        $file->move(public_path() . "/vocabulary/$topic->id", $fileName);
+                        $vocabularyData['image'] = $fileName;
+                    }
+
+                    Vocabulary::where(['topic_id' => $topic->id])->create($vocabularyData);
+                    $count++;
+                }
+                $topic->update(['count' => $count]);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Create topic successfully'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to create topic', [
+                'error' => $e->getMessage(),
+                'line' => $e->getTrace(),
+                'file' => $e->getFile()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Tạo không thành công'
+            ], 500);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $slug)
     {
         $topic = Topic::with('vocabulary')->where(['slug' => $slug])->first();
@@ -81,66 +80,59 @@ class TopicController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request)
     {
-        try {
-            $id = $request->id;
-            $topic = Topic::find($id);
-            if ($topic) {
-                foreach ($request->vocabularyIds as $vocabId) {
-                    $payload = [
-                        'english' => $request->input("english.$vocabId"),
-                        'vietnamese' => $request->input("vietnamese.$vocabId"),
-                    ];
-                    if ($request->hasFile("image.$vocabId")) {
-                        $file = $request->file("image.{$vocabId}");
-                        $imageName = uniqid() . '.' . $file->getClientOriginalExtension();
-                        $file->move(public_path('vocabulary'), $imageName);
-
-                        $payload['image'] = $imageName;
-                    }
-                    Vocabulary::where(['id' => $vocabId, 'topic_id' => $id])->update($payload);
-                }
-            }
-            return response()->json([
-                'success' => true,
-                'data' => $request->all()
+        $name = $request->name;
+        $max_score = $request->maxscore;
+        $id = $request->id;
+        $user_id = auth()->user()->id;
+        if ($name) {
+            $check = Topic::where(['id' => $id, 'user_id' => $user_id])->update([
+                'name' => $name,
+                'slug' => Str::slug($name)
             ]);
-        } catch (\Exception $e) {
-            Log::error("Failed to update topic: ", [
-                'error' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Fail'
-            ], 500);
         }
+        if ($max_score) {
+            $check = Topic::where(['id' => $id, 'user_id' => $user_id])->update([
+                'max_score' => $max_score,
+            ]);
+        }
+
+        return response()->json(['success' => true, 'data' => $request->check]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Request $request)
     {
         $id = $request->id;
         $topic = Topic::find($id);
         if ($topic) {
-            $topic->delete();
+            if ($this->deleteDirectory(public_path() . "/vocabulary/$id")) {
+                $topic->delete();
+            }
         }
         return redirect()->back();
+    }
+
+    private function deleteDirectory($dir)
+    {
+        if (!file_exists($dir)) {
+            return true;
+        }
+
+        if (!is_dir($dir)) {
+            return unlink($dir);
+        }
+
+        foreach (scandir($dir) as $item) {
+            if ($item == '.' || $item == '..') {
+                continue;
+            }
+
+            if (!$this->deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+                return false;
+            }
+        }
+
+        return rmdir($dir);
     }
 }
