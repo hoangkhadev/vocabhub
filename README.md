@@ -3,7 +3,7 @@
 **Mô tả ngắn:** Ứng dụng web giúp người dùng học từ vựng tiếng Anh một cách hiệu quả.
 
 **Các tính năng chính:**
-
+-   Đăng ký, đăng nhập, quên mật khẩu
 -   Thêm, xóa, chỉnh sửa từ vựng theo chủ đề
 -   Làm bài tập (Hiển thị nghĩa tiếng việt, người dùng viết lại bằng tiếng anh)
 
